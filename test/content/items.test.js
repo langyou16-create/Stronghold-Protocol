@@ -799,6 +799,22 @@ test('盟约之币 +1 / +2, 骑士储蓄罐 1–6 / 2–12 funds (random, both e
   }
 });
 
+test('盟约之币 and 骑士储蓄罐 pay the same funds when directly destroyed', () => {
+  for (const [id, lo, hi] of [[A('1_03'), 1, 1], [B('1_03'), 2, 2], [A('3_12'), 1, 6], [B('3_12'), 2, 12]]) {
+    const { m, ps } = setup({ seed: 200 + lo + hi });
+    const seen = new Set();
+    for (let k = 0; k < 60; k++) {
+      const f0 = ps.funds;
+      const item = giveItem(m, ps, id);
+      assert.deepEqual(m.handle('p_0', { t: 'g.destroy', uid: item.uid }), OK);
+      const got = ps.funds - f0;
+      assert.ok(got >= lo && got <= hi, `${id} ${got}`);
+      seen.add(got);
+    }
+    assert.equal(seen.size, hi - lo + 1, `${id} covers ${lo}..${hi}`);
+  }
+});
+
 test('随身身份牌: every bond of the target +3 / +6 layers, active or not', () => {
   for (const [id, n] of [[A('1_04'), 3], [B('1_04'), 6]]) {
     const { m, ps, equip } = setup();

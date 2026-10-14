@@ -67,13 +67,19 @@ function mostBondMate(ctx, bonds) {
   return ctx.rng.pick(pick) || null;
 }
 
+function grantRandomFunds(ctx, ev) {
+  const p = paramsOf(ctx, ev.item);
+  const lo = int(p.min, 1);
+  const hi = Math.max(lo, int(p.max, lo));
+  ctx.addFunds(lo + ctx.rng.int(hi - lo + 1), 'item');
+}
+
 const ITEM_HANDLERS = {
   equip_destory_gain_random_coin: {
-    onEquip(ctx, ev) {
-      const p = paramsOf(ctx, ev.item);
-      const lo = int(p.min, 1);
-      const hi = Math.max(lo, int(p.max, lo));
-      ctx.addFunds(lo + ctx.rng.int(hi - lo + 1), 'item');
+    onEquip: grantRandomFunds,
+    onDestroy(ctx, ev) {
+      if (ev.reason !== 'player') return;
+      grantRandomFunds(ctx, ev);
     },
   },
   use_equip_reward_char_chess_bond_layer: {
